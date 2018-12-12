@@ -48,7 +48,7 @@ void loop() {
 		if (digitalRead(encoderPhase2) != aState) {
 			eoncoderVal ++;
 		}
-		else if (digitalRead(encoderPhase2) = aState){
+		else if (digitalRead(encoderPhase2) == aState){
 			eoncoderVal --;
 		}
 	}
