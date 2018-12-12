@@ -15,14 +15,14 @@
 
 #include <SPI.h>
 
-const int slaveSelectPin = 10;
+const byte slaveSelectPin = 10;
 
-const int  encoderSwitchPin = 4;
-const int  encoderPhase1 = 2;
-const int  encoderPhase2 = 3;
+const byte  encoderSwitchPin = 4;
+const byte  encoderPhase1 = 2;
+const byte  encoderPhase2 = 3;
       byte eoncoderVal = 0xf0;
-      int aState;
-      int aLastState;
+      bool aState;
+      bool aLastState;
 
 void setup() {
   Serial.begin(9600);
@@ -67,18 +67,4 @@ void loop() {
 
 
 
-}
-
-
-void SPI_send(byte value) {
-
-  // take the SS pin low to select the chip:
-  digitalWrite(slaveSelectPin, LOW);
-
-  //  send in the value via SPI:
-  SPI.transfer(value);
-
-
-  // take the SS pin high to de-select the chip:
-  digitalWrite(slaveSelectPin, HIGH);
 }
