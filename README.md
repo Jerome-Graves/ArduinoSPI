@@ -9,5 +9,5 @@ Send OSC float between 0-255 to  "/1/slider" .
 # SPI_03
 Sends a count to FPGA though SPI.
 
-#SPI_getTest
-Sets up Arduino as SPI slave. 
+# SPI_getTest
+Sets up Arduino as SPI slave.
