@@ -18,8 +18,8 @@ char pass[] = "synth123";           // network password
 byte val = 0;
 
 const byte ctrl_code_waveType = 0x01 ;
-const byte ctrl_code_phase    = 0x02 ;
-const byte ctrl_code_freq     = 0x03 ;
+const byte ctrl_code_freq     = 0x02 ;
+const byte ctrl_code_phase    = 0x03 ;
 const byte ctrl_code_amp      = 0x04 ;
 
 
