@@ -139,12 +139,12 @@ void loop() {
     if (!msg.hasError()) {
       // Route osc msg to funtion.
       msg.route("/1/waveType",waveType1);
-      msg.route("/1/phase1", phase1);
+      msg.route("/1/phase", phase1);
       msg.route("/1/freq", frequ1);
       msg.route("/1/amp", amp1);
 
       msg.route("/2/waveType",waveType2);
-      msg.route("/2/phase2", phase2);
+      msg.route("/2/phase", phase2);
       msg.route("/2/freq", frequ2);
       msg.route("/2/amp", amp2);
     } else {
