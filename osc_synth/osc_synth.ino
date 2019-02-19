@@ -17,7 +17,10 @@ char pass[] = "synth123";           // network password
 
 byte val = 0;
 
-
+const byte ctrl_code_waveType = 0x01 ;
+const byte ctrl_code_phase    = 0x02 ;
+const byte ctrl_code_freq     = 0x03 ;
+const byte ctrl_code_amp      = 0x04 ;
 
 
 // A UDP instance to let us send and receive packets over UDP
@@ -30,15 +33,19 @@ unsigned int ledState = LOW;
 
 
 
-void send_SPI(byte data)
+void send_SPI(byte ctrl, byte data)
 {
 
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
 
   digitalWrite(SELECT, LOW);
+  SPI.transfer(ctrl); // control byte
 
-   SPI.transfer(data);
+  SPI.transfer(data);
+
+  SPI.transfer(0x00); // end byte
+
   digitalWrite(SELECT, HIGH);
 
   digitalWrite(LED_BUILTIN, HIGH);
@@ -99,8 +106,6 @@ void loop() {
     }
     if (!msg.hasError()) {
       // Route osc msg to funtion.
-      msg.route("/1/slider", slider);
-
       msg.route("/1/waveType",waveType1);
       msg.route("/1/phase1", phase1);
       msg.route("/1/freq", frequ1);
@@ -119,41 +124,35 @@ void loop() {
 }
 
 
-//slider
-void slider(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
-  Serial.print("/Slider: ");
-  send_SPI(val);
-  Serial.println(val);
-}
+
 
 
 //wave 1 atributes
 void waveType1(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/waveType1: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_waveType,val);
   Serial.println(val);
 }
 
 void phase1(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/pitch1: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_phase,val);
   Serial.println(val);
 }
 
 void frequ1(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/frequ1: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_freq,val);
   Serial.println(val);
 }
 
 void amp1(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/amp1: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_amp,val);
   Serial.println(val);
 }
 
@@ -162,27 +161,27 @@ void amp1(OSCMessage &msg,int addoff) {
 void waveType2(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/waveType2: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_waveType+0x10,val);
   Serial.println(val);
 }
 
 void phase2(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/pitch2: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_phase+0x10,val);
   Serial.println(val);
 }
 
 void frequ2(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/frequ2: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_freq+0x10,val);
   Serial.println(val);
 }
 
 void amp2(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/amp2: ");
-  send_SPI(val);
+  send_SPI(ctrl_code_amp+0x10,val);
   Serial.println(val);
 }
