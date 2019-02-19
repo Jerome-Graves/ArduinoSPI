@@ -33,24 +33,56 @@ unsigned int ledState = LOW;
 
 
 
-void send_SPI(byte ctrl, byte data)
+void send_waveType(byte ctrl, byte data)
 {
+  digitalWrite(LED_BUILTIN, LOW); // debug light
+  delay(1);
+  digitalWrite(SELECT, LOW); // CS enable
+  SPI.transfer(ctrl); // control byte
+  SPI.transfer(data); // send byte
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH); // CS dissable
+  digitalWrite(LED_BUILTIN, HIGH); // debug light
+}
 
+void send_freq(byte ctrl, long data)
+{
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
-
   digitalWrite(SELECT, LOW);
   SPI.transfer(ctrl); // control byte
-
-  SPI.transfer(data);
-
+  SPI.transfer16(0x0000);
+  SPI.transfer((byte)data); // ** change this to 24 bit stream
   SPI.transfer(0x00); // end byte
-
   digitalWrite(SELECT, HIGH);
-
   digitalWrite(LED_BUILTIN, HIGH);
-  //delay(1);
 }
+
+void send_phase(byte ctrl, short data)
+{
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1);
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(ctrl); // control byte
+  SPI.transfer16(data);
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+void send_amp(byte ctrl, short data)
+{
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1);
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(ctrl); // control byte
+  SPI.transfer16(data);
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+
 
 
 void setup() {
@@ -131,28 +163,28 @@ void loop() {
 void waveType1(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/waveType1: ");
-  send_SPI(ctrl_code_waveType,val);
+  send_waveType(ctrl_code_waveType,val);
   Serial.println(val);
 }
 
 void phase1(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (short)msg.getFloat(0);
   Serial.print("/pitch1: ");
-  send_SPI(ctrl_code_phase,val);
+  send_phase(ctrl_code_phase,val);
   Serial.println(val);
 }
 
 void frequ1(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (long)msg.getFloat(0);
   Serial.print("/frequ1: ");
-  send_SPI(ctrl_code_freq,val);
+  send_freq(ctrl_code_freq,val);
   Serial.println(val);
 }
 
 void amp1(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (short)msg.getFloat(0);
   Serial.print("/amp1: ");
-  send_SPI(ctrl_code_amp,val);
+  send_amp(ctrl_code_amp,val);
   Serial.println(val);
 }
 
@@ -161,27 +193,27 @@ void amp1(OSCMessage &msg,int addoff) {
 void waveType2(OSCMessage &msg,int addoff) {
   val = (byte)msg.getFloat(0);
   Serial.print("/waveType2: ");
-  send_SPI(ctrl_code_waveType+0x10,val);
+  send_waveType(ctrl_code_waveType+0x10,val);
   Serial.println(val);
 }
 
 void phase2(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (short)msg.getFloat(0);
   Serial.print("/pitch2: ");
-  send_SPI(ctrl_code_phase+0x10,val);
+  send_phase(ctrl_code_phase+0x10,val);
   Serial.println(val);
 }
 
 void frequ2(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (long)msg.getFloat(0);
   Serial.print("/frequ2: ");
-  send_SPI(ctrl_code_freq+0x10,val);
+  send_freq(ctrl_code_freq+0x10,val);
   Serial.println(val);
 }
 
 void amp2(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  val = (short)msg.getFloat(0);
   Serial.print("/amp2: ");
-  send_SPI(ctrl_code_amp+0x10,val);
+  send_amp(ctrl_code_amp+0x10,val);
   Serial.println(val);
 }
