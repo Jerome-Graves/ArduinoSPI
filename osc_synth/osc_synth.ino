@@ -47,12 +47,17 @@ void send_waveType(byte ctrl, byte data)
 
 void send_freq(byte ctrl, long data)
 {
+  byte buff[3];
+  buff [0] =  (byte) data >> 8;
+  buff [1] =  (byte) data >> 16;
+  buff [2] =  (byte) data >> 24;
+
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
   digitalWrite(SELECT, LOW);
   SPI.transfer(ctrl); // control byte
-  SPI.transfer16(0x0000);
-  SPI.transfer((byte)data); // ** change this to 24 bit stream
+  SPI.transfer(buff, sizeof(buff));
+
   SPI.transfer(0x00); // end byte
   digitalWrite(SELECT, HIGH);
   digitalWrite(LED_BUILTIN, HIGH);
