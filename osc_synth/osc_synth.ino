@@ -1,27 +1,28 @@
 
+//Libraries:
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #else
 #include <WiFi.h>
-#endif
-#include <WiFiUdp.h>
-#include <OSCMessage.h>
+#endif // wifi for ESP8266
+
+#include <WiFiUdp.h>     // Datagram Protocol over wifi
+#include <OSCMessage.h>  // OSC comunication
 #include <OSCBundle.h>
 #include <OSCData.h>
-#include <SPI.h>
+#include <SPI.h>        // SPI comunication
 
-#define SELECT 3  //chip select
+//Constants:
+#define SELECT 3  //Chip select pin for SPI (CS)
+
+//Control codes For SPI:
+#define WAVETYPE  0x01
+#define FREQ      0x02
+#define PHASE     0x03
+#define AMP       0x04
 
 char ssid[] = "synth-net";          // network SSID (name)
 char pass[] = "synth123";           // network password
-
-byte val = 0;
-
-const byte ctrl_code_waveType = 0x01 ;
-const byte ctrl_code_freq     = 0x02 ;
-const byte ctrl_code_phase    = 0x03 ;
-const byte ctrl_code_amp      = 0x04 ;
-
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP Udp;
@@ -33,19 +34,21 @@ unsigned int ledState = LOW;
 
 
 
-void send_waveType(byte ctrl, byte data)
+//
+
+void send_SPI(byte ctrl, byte data)
 {
-  digitalWrite(LED_BUILTIN, LOW); // debug light
+  digitalWrite(LED_BUILTIN, LOW); // debug light on
   delay(1);
   digitalWrite(SELECT, LOW); // CS enable
   SPI.transfer(ctrl); // control byte
-  SPI.transfer(data); // send byte
+  SPI.transfer(data); // send  data byte
   SPI.transfer(0x00); // end byte
-  digitalWrite(SELECT, HIGH); // CS dissable
-  digitalWrite(LED_BUILTIN, HIGH); // debug light
+  digitalWrite(SELECT, HIGH); // CS disable
+  digitalWrite(LED_BUILTIN, HIGH); // debug light off
 }
 
-void send_freq(byte ctrl, long data)
+void send_SPI(byte ctrl, long data)
 {
   byte buff[3];
   buff [0] =  (byte) data >> 8;
@@ -63,19 +66,7 @@ void send_freq(byte ctrl, long data)
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void send_phase(byte ctrl, short data)
-{
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1);
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(ctrl); // control byte
-  SPI.transfer16(data);
-  SPI.transfer(0x00); // end byte
-  digitalWrite(SELECT, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH);
-}
-
-void send_amp(byte ctrl, short data)
+void send_SPI(byte ctrl, short data)
 {
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
@@ -91,13 +82,14 @@ void send_amp(byte ctrl, short data)
 
 
 void setup() {
-  pinMode(SELECT, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, ledState);    // turn *on* led
+  pinMode(SELECT, OUTPUT); // enable CS pin
+  pinMode(LED_BUILTIN, OUTPUT); // enable onboard led
+  digitalWrite(LED_BUILTIN, ledState);    // turn on led
 
+  // Set up SPI:
   SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
   SPI.begin();
-
+  //Begin Serial for Debug.
   Serial.begin(115200);
 
   // Connect to WiFi network
@@ -134,12 +126,12 @@ void setup() {
 
 void loop() {
 
-  OSCMessage msg;
-  int size = Udp.parsePacket();
+  OSCMessage msg; // data type to store OSC packet.
+  int size = Udp.parsePacket(); // size recived udp packet
 
   if (size > 0) {
     while (size--) {
-      msg.fill(Udp.read());
+      msg.fill(Udp.read()); // fill msg with udp data
     }
     if (!msg.hasError()) {
       // Route osc msg to funtion.
@@ -162,63 +154,63 @@ void loop() {
 
 
 
-
+//Functions called when correct OSC message recived.
 
 //wave 1 atributes
 void waveType1(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  byte val = (byte)msg.getFloat(0);
   Serial.print("/waveType1: ");
-  send_waveType(ctrl_code_waveType,val);
+  send_SPI(WAVETYPE,val);
   Serial.println(val);
 }
 
 void phase1(OSCMessage &msg,int addoff) {
-  val = (short)msg.getFloat(0);
+  short val = (short)msg.getFloat(0);
   Serial.print("/pitch1: ");
-  send_phase(ctrl_code_phase,val);
+  send_SPI(PHASE,val);
   Serial.println(val);
 }
 
 void frequ1(OSCMessage &msg,int addoff) {
-  val = (long)msg.getFloat(0);
+  long val = (long)msg.getFloat(0);
   Serial.print("/frequ1: ");
-  send_freq(ctrl_code_freq,val);
+  send_SPI(FREQ,val);
   Serial.println(val);
 }
 
 void amp1(OSCMessage &msg,int addoff) {
-  val = (short)msg.getFloat(0);
+  short val = (short)msg.getFloat(0);
   Serial.print("/amp1: ");
-  send_amp(ctrl_code_amp,val);
+  send_SPI(AMP,val);
   Serial.println(val);
 }
 
 
 //Wave 2 atributes
 void waveType2(OSCMessage &msg,int addoff) {
-  val = (byte)msg.getFloat(0);
+  byte val = (byte)msg.getFloat(0);
   Serial.print("/waveType2: ");
-  send_waveType(ctrl_code_waveType+0x10,val);
+  send_SPI(WAVETYPE+0x10,val);
   Serial.println(val);
 }
 
 void phase2(OSCMessage &msg,int addoff) {
-  val = (short)msg.getFloat(0);
+  short val = (short)msg.getFloat(0);
   Serial.print("/pitch2: ");
-  send_phase(ctrl_code_phase+0x10,val);
+  send_SPI(PHASE+0x10,val);
   Serial.println(val);
 }
 
 void frequ2(OSCMessage &msg,int addoff) {
-  val = (long)msg.getFloat(0);
+  long val = (long)msg.getFloat(0);
   Serial.print("/frequ2: ");
-  send_freq(ctrl_code_freq+0x10,val);
+  send_SPI(FREQ+0x10,val);
   Serial.println(val);
 }
 
 void amp2(OSCMessage &msg,int addoff) {
-  val = (short)msg.getFloat(0);
+  short val = (short)msg.getFloat(0);
   Serial.print("/amp2: ");
-  send_amp(ctrl_code_amp+0x10,val);
+  send_SPI(AMP+0x10,val);
   Serial.println(val);
 }
