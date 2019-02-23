@@ -66,7 +66,7 @@ void send_SPI(byte ctrl, long data)
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void send_SPI(byte ctrl, short data)
+void send_SPI(byte ctrl, uint16_t data)
 {
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
@@ -115,7 +115,7 @@ void setup() {
 #ifdef ESP32
   Serial.println(localPort);
 #else
-  //Serial.println(Udp.localPort());
+  Serial.println(Udp.localPort());
 #endif
 
 }
@@ -165,7 +165,7 @@ void waveType1(OSCMessage &msg,int addoff) {
 }
 
 void phase1(OSCMessage &msg,int addoff) {
-  short val = (short)msg.getFloat(0);
+  uint16_t  val = (short)msg.getFloat(0);
   Serial.print("/pitch1: ");
   send_SPI(PHASE,val);
   Serial.println(val);
@@ -179,7 +179,7 @@ void frequ1(OSCMessage &msg,int addoff) {
 }
 
 void amp1(OSCMessage &msg,int addoff) {
-  short val = (short)msg.getFloat(0);
+  uint16_t  val = (short)msg.getFloat(0);
   Serial.print("/amp1: ");
   send_SPI(AMP,val);
   Serial.println(val);
@@ -195,7 +195,7 @@ void waveType2(OSCMessage &msg,int addoff) {
 }
 
 void phase2(OSCMessage &msg,int addoff) {
-  short val = (short)msg.getFloat(0);
+  uint16_t val = (short)msg.getFloat(0);
   Serial.print("/pitch2: ");
   send_SPI(PHASE+0x10,val);
   Serial.println(val);
@@ -209,7 +209,7 @@ void frequ2(OSCMessage &msg,int addoff) {
 }
 
 void amp2(OSCMessage &msg,int addoff) {
-  short val = (short)msg.getFloat(0);
+  uint16_t  val = (short)msg.getFloat(0);
   Serial.print("/amp2: ");
   send_SPI(AMP+0x10,val);
   Serial.println(val);
