@@ -20,9 +20,10 @@
 #define FREQ      0x02
 #define PHASE     0x03
 #define AMP       0x04
+#define OSC2MASK  0x10
 
-char ssid[] = "synth-net";          // network SSID (name)
-char pass[] = "synth123";           // network password
+char *ssid = "synth-net";          // network SSID (name)
+char *pass = "synth123";           // network password
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP Udp;
@@ -31,92 +32,6 @@ const unsigned int outPort = 9999;          // remote port
 const unsigned int localPort = 8888;        // local port to listen for UDP packets
 OSCErrorCode error;
 unsigned int ledState = LOW;
-
-
-
-//
-
-void send_SPI(byte ctrl, byte data)
-{
-  digitalWrite(LED_BUILTIN, LOW); // debug light on
-  delay(1);
-  
-  digitalWrite(SELECT, LOW); // CS enable
-  SPI.transfer(ctrl); // control byte
-  digitalWrite(SELECT, HIGH); // CS disable
-  
-  digitalWrite(SELECT, LOW); // CS enable
-  SPI.transfer(data);
-  digitalWrite(SELECT, HIGH); // CS disable
-  
-  digitalWrite(SELECT, LOW); // CS enable
-  SPI.transfer(0x00); // end byte
-  digitalWrite(SELECT, HIGH); // CS disable
-  
-  digitalWrite(LED_BUILTIN, HIGH); // debug light off
-}
-
-void send_SPI(byte ctrl, long data)
-{
-  byte buff[3];
-  buff [0] =  (byte) (data >> 8);
-  buff [1] =  (byte) (data >> 16);
-  buff [2] =  (byte) (data >> 24);
-
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1);
-  
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(ctrl); // control byte
-  digitalWrite(SELECT, HIGH);
-
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(buff[0]);
-  digitalWrite(SELECT, HIGH);
-  
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(buff[1]);
-  digitalWrite(SELECT, HIGH);
-  
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(buff[2]);
-  digitalWrite(SELECT, HIGH);
-
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(0x00); // end byte
-  digitalWrite(SELECT, HIGH);
-  
-  digitalWrite(LED_BUILTIN, HIGH);
-}
-
-void send_SPI(byte ctrl, uint16_t data)
-{
-  byte buff[2];
-  buff[0] =  (byte) data ;
-  buff[1] =  (byte) (data >> 8);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1);
-  
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(ctrl); // control byte
-  digitalWrite(SELECT, HIGH);
-  
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(buff[0]);
-  digitalWrite(SELECT, HIGH);
-
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(buff[1]);
-  digitalWrite(SELECT, HIGH);
-
-  digitalWrite(SELECT, LOW);
-  SPI.transfer(0x00); // end byte
-  digitalWrite(SELECT, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH);
-}
-
-
-
 
 void setup() {
   SPI.transfer(0x00); // control byte
@@ -157,10 +72,6 @@ void setup() {
 #endif
 
 }
-
-
-
-
 
 void loop() {
 
@@ -203,7 +114,7 @@ void waveType1(OSCMessage &msg,int addoff) {
 }
 
 void phase1(OSCMessage &msg,int addoff) {
-  uint16_t  val = (short)msg.getFloat(0);
+  uint16_t  val = (uint16_t)msg.getFloat(0);
   Serial.print("/phase: ");
   send_SPI(PHASE,val);
   Serial.println(val);
@@ -217,7 +128,7 @@ void frequ1(OSCMessage &msg,int addoff) {
 }
 
 void amp1(OSCMessage &msg,int addoff) {
-  uint16_t  val = (short)msg.getFloat(0);
+  uint16_t  val = (uint16_t)msg.getFloat(0);
   Serial.print("/amp1: ");
   send_SPI(AMP,val);
   Serial.println(val);
@@ -228,27 +139,106 @@ void amp1(OSCMessage &msg,int addoff) {
 void waveType2(OSCMessage &msg,int addoff) {
   byte val = (byte)msg.getFloat(0);
   Serial.print("/waveType2: ");
-  send_SPI(WAVETYPE+0x10,val);
+  send_SPI(WAVETYPE | OSC2MASK,val);
   Serial.println(val);
 }
 
 void phase2(OSCMessage &msg,int addoff) {
-  uint16_t val = (short)msg.getFloat(0);
+  uint16_t val = (uint16_t)msg.getFloat(0);
   Serial.print("/phase: ");
-  send_SPI(PHASE+0x10,val);
+  send_SPI(PHASE | OSC2MASK,val);
   Serial.println(val);
 }
 
 void frequ2(OSCMessage &msg,int addoff) {
   long val = (long)msg.getFloat(0);
   Serial.print("/frequ2: ");
-  send_SPI(FREQ+0x10,val);
+  send_SPI(FREQ | OSC2MASK,val);
   Serial.println(val);
 }
 
 void amp2(OSCMessage &msg,int addoff) {
-  uint16_t  val = (short)msg.getFloat(0);
+  uint16_t  val = (uint16_t)msg.getFloat(0);
   Serial.print("/amp2: ");
-  send_SPI(AMP+0x10,val);
+  send_SPI(AMP | OSC2MASK,val);
   Serial.println(val);
+}
+
+void send_SPI(byte ctrl, byte data)
+{
+  digitalWrite(LED_BUILTIN, LOW); // debug light on
+  delay(1);
+
+  digitalWrite(SELECT, LOW); // CS enable
+  SPI.transfer(ctrl); // control byte
+  digitalWrite(SELECT, HIGH); // CS disable
+
+  digitalWrite(SELECT, LOW); // CS enable
+  SPI.transfer(data);
+  digitalWrite(SELECT, HIGH); // CS disable
+
+  digitalWrite(SELECT, LOW); // CS enable
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH); // CS disable
+
+  digitalWrite(LED_BUILTIN, HIGH); // debug light off
+}
+
+void send_SPI(byte ctrl, long data)
+{
+  byte buff[3];
+  buff [0] =  (byte) (data >> 8);
+  buff [1] =  (byte) (data >> 16);
+  buff [2] =  (byte) (data >> 24);
+
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(ctrl); // control byte
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(buff[0]);
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(buff[1]);
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(buff[2]);
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+void send_SPI(byte ctrl, uint16_t data)
+{
+  byte buff[2];
+  buff[0] =  (byte) data ;
+  buff[1] =  (byte) (data >> 8);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(ctrl); // control byte
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(buff[0]);
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(buff[1]);
+  digitalWrite(SELECT, HIGH);
+
+  digitalWrite(SELECT, LOW);
+  SPI.transfer(0x00); // end byte
+  digitalWrite(SELECT, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
