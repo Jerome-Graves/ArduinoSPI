@@ -22,8 +22,8 @@
 #define AMP       0x04
 #define OSC2MASK  0x10
 
-char *ssid = "synth-net";          // network SSID (name)
-char *pass = "synth123";           // network password
+const char *ssid = "synth-net";          // network SSID (name)
+const char *pass = "synth123";           // network password
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP Udp;
