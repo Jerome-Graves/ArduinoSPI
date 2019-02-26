@@ -34,7 +34,6 @@ OSCErrorCode error;
 unsigned int ledState = LOW;
 
 void setup() {
-  SPI.transfer(0x00); // control byte
   pinMode(SELECT, OUTPUT); // enable CS pin
   pinMode(LED_BUILTIN, OUTPUT); // enable onboard led
   digitalWrite(LED_BUILTIN, ledState);    // turn on led
