@@ -183,9 +183,9 @@ void send_SPI(byte ctrl, byte data)
 void send_SPI(byte ctrl, long data)
 {
   byte buff[3];
-  buff [0] =  (byte) (data);
-  buff [1] =  (byte) (data >> 8);
-  buff [2] =  (byte) (data >> 16);
+  buff [0] =  (byte) (data >> 8);
+  buff [1] =  (byte) (data >> 16);
+  buff [2] =  (byte) (data >> 24);
 
   digitalWrite(LED_BUILTIN, LOW);
   delay(1);
